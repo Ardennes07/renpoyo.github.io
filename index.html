@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+     <link rel="icon" href="favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEO TOKYO OS v11.0 (Mobile Move Only)</title>
+    <title>ATLAS DIVE v1.0</title>
     
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -196,13 +197,14 @@
     
     <div id="guide">
         <span style="color:var(--neon-cyan); font-weight:bold;">CONTROLS</span><br>
-        L-Drag: PAN / MOVE<br>
-        R-Drag: ROTATE / TILT<br>
-        Wheel: ZOOM
+        Middle Drag: PAN<br>
+        Right Drag: ROTATE<br>
+        Wheel: ZOOM<br>
+        Left Click: SELECT
     </div>
 
     <div id="menubar">
-        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v11.0</div>
+        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">ATLAS DIVEv1.0</div>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-feed')">NEWS</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-post')">POST</button>
         </div>
@@ -342,7 +344,7 @@
         };
         document.querySelectorAll('.window-header').forEach(h => UI.makeDraggable(h));
 
-        // --- Cesium Init (Map Controls STRICTLY Optimized for Mobile Movement) ---
+        // --- Cesium Init ---
         Cesium.Ion.defaultAccessToken = CONFIG.cesiumToken;
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrainProvider: Cesium.createWorldTerrain(),
@@ -357,32 +359,25 @@
         scene.fog.enabled = true; scene.fog.density = 0.0005;
         scene.globe.enableLighting = false; scene.sun.show = false; scene.skyBox.show = false;
 
-        // ★★★ STRICT MOBILE CONTROLS (MOVEMENT ONLY) ★★★
-        // これにより1本指で移動、2本指で回転・ズームに固定されます
-        const sscc = scene.screenSpaceCameraController;
+        // ★★★ 指定された視点制御 (1つ目のコードと全く同じ設定) ★★★
+        // ここを修正しました。1つ目のコードの controller 設定をそのまま移植しています。
+        const controller = viewer.scene.screenSpaceCameraController;
         
-        // 1. Disable "Look" (視点変更) to prevent confusing rotation on touch
-        sscc.enableLook = false;
-        
-        // 2. Basic Enablers
-        sscc.enableTranslate = true;
-        sscc.enableZoom = true;
-        sscc.enableRotate = true;
-        sscc.enableTilt = true;
-        
-        // 3. Map Touch Events to Actions (スマホ操作の肝)
-        // 1本指ドラッグ = 地図移動 (Pan)
-        sscc.translateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
-        
-        // 2本指ピンチ/ドラッグ = ズーム、回転、傾き
-        sscc.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
-        sscc.rotateEventTypes = [Cesium.CameraEventType.PINCH]; 
-        sscc.tiltEventTypes = [Cesium.CameraEventType.PINCH, Cesium.CameraEventType.RIGHT_DRAG];
+        // 左ドラッグ: 無効 (選択のみ)
+        controller.enableTranslate = false; 
+        controller.enableLook = false;
 
-        // Inertia (慣性) adjustments for smoother feel
-        sscc.inertiaSpin = 0.5;
-        sscc.inertiaTranslate = 0.5;
-        sscc.inertiaZoom = 0.5;
+        // ホイールドラッグ (Middle): 平行移動 (PAN)
+        controller.translateEventTypes = [Cesium.CameraEventType.MIDDLE_DRAG];
+        
+        // 右ドラッグ: 回転
+        controller.enableRotate = true;
+        controller.rotateEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];
+        controller.tiltEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];
+
+        // ホイールスクロール: ズーム
+        controller.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
+
 
         async function loadBuildings() {
             try {
@@ -582,7 +577,12 @@
 
         // Click Handler
         const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-        handler.setInputAction(() => { if(STATE.isOrbiting) App.stopOrbit(); }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+        // 右ドラッグやホイールクリック時のOrbit停止処理追加
+        const userAction = () => { if(STATE.isOrbiting) App.stopOrbit(); };
+        handler.setInputAction(userAction, Cesium.ScreenSpaceEventType.RIGHT_DOWN);
+        handler.setInputAction(userAction, Cesium.ScreenSpaceEventType.MIDDLE_DOWN);
+        handler.setInputAction(userAction, Cesium.ScreenSpaceEventType.WHEEL);
+
         handler.setInputAction(c => {
             const picked = scene.pick(c.position);
             if (Cesium.defined(picked) && picked.id?.properties?.newsData) App.startOrbit(picked.id.properties.newsData.getValue());
