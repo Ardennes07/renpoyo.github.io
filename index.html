@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEO TOKYO OS v10.8 (Mobile & Timestamp)</title>
+    <title>NEO TOKYO OS v10.95 (JP Localized)</title>
     
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -17,9 +17,7 @@
             --neon-red: #ff3333;
             --neon-purple: #bd00ff;
             --neon-green: #00ff41;
-            --neon-gold: #f1c40f;
             --glass-bg: rgba(5, 10, 20, 0.90);
-            --border-color: rgba(0, 243, 255, 0.3);
             --text-main: #eee;
             --text-dim: #aaa;
             --font-ui: 'Orbitron', sans-serif;
@@ -30,60 +28,61 @@
         /* --- Map Container --- */
         #cesiumContainer { width: 100%; height: 100%; z-index: 0; }
 
-        /* --- UI Common Components --- */
+        /* --- UI Components --- */
         button { font-family: var(--font-ui); }
         input, textarea, select {
             width: 100%; background: #151515; border: 1px solid #444; 
-            color: #fff; padding: 6px; margin-bottom: 6px; box-sizing: border-box; 
-            font-family: inherit; font-size: 13px; outline: none; /* スマホで見やすいようフォント調整 */
+            color: #fff; padding: 8px; margin-bottom: 6px; box-sizing: border-box; 
+            font-family: inherit; font-size: 14px; outline: none;
         }
         input:focus, textarea:focus { border-color: var(--neon-cyan); }
         .action-btn { 
             width: 100%; background: var(--neon-cyan); color: #000; border: none; 
-            padding: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s;
+            padding: 12px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.2s;
         }
-        .action-btn:hover { background: #fff; box-shadow: 0 0 10px var(--neon-cyan); }
-
-        /* --- Signboard (3D Label) --- */
+        
+        /* --- Signboard (Desktop: 3D Label / Mobile: Bottom Sheet) --- */
         #signboard-container {
             position: absolute; top: 0; left: 0; display: none; z-index: 150;
             pointer-events: none; 
             transform: translate3d(0, 0, 0); 
             will-change: transform;
         }
+
         .signboard-offset {
             transform: translate(-50%, -100%);
-            padding-bottom: 50px; /* Space for pole */
+            padding-bottom: 50px; 
             display: flex; flex-direction: column; align-items: center;
         }
+
         #signboard-card {
-            width: 300px; min-height: 150px;
+            width: 320px; min-height: 150px;
             background: var(--glass-bg);
             border: 1px solid var(--neon-cyan);
             border-radius: 4px;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             pointer-events: auto;
             display: flex; flex-direction: column;
-            position: relative;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
         }
+        
         #signboard-pole {
             width: 2px; height: 50px; background: var(--neon-cyan);
             box-shadow: 0 0 10px var(--neon-cyan);
         }
+
         #signboard-header {
-            padding: 8px 12px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #444;
+            padding: 10px 12px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #444;
             display: flex; justify-content: space-between; align-items: center;
         }
-        #signboard-title { font-family: var(--font-ui); font-size: 13px; font-weight: bold; color: #fff; }
-        #signboard-close { cursor: pointer; color: #888; font-size: 14px; padding: 5px; }
-        #signboard-content { padding: 10px; font-size: 13px; line-height: 1.6; color: #ddd; flex-grow: 1; }
-        #signboard-img { width: 100%; height: 120px; object-fit: cover; border: 1px solid #444; margin-bottom: 8px; display: none; }
+        #signboard-title { font-family: var(--font-body); font-size: 14px; font-weight: bold; color: #fff; } /* 日本語タイトル用にフォント変更 */
+        #signboard-close { cursor: pointer; color: #888; font-size: 16px; padding: 5px; }
+        #signboard-content { padding: 15px; font-size: 13px; line-height: 1.8; color: #ddd; flex-grow: 1; max-height: 300px; overflow-y: auto; }
+        #signboard-img { width: 100%; height: 140px; object-fit: cover; border: 1px solid #444; margin-bottom: 10px; display: none; }
         #signboard-nav { display: flex; border-top: 1px solid #444; background: rgba(0,0,0,0.3); }
-        .nav-btn { flex: 1; background: transparent; border: none; color: var(--neon-cyan); padding: 12px; cursor: pointer; }
+        .nav-btn { flex: 1; background: transparent; border: none; color: var(--neon-cyan); padding: 15px; cursor: pointer; font-size: 16px; }
         .nav-btn:disabled { color: #444; }
-        .nav-btn:first-child { border-right: 1px solid #444; }
-        #page-indicator { position: absolute; bottom: 45px; right: 10px; font-size: 9px; color: #888; font-family: var(--font-ui); }
+        #page-indicator { position: absolute; bottom: 50px; right: 15px; font-size: 10px; color: #888; font-family: var(--font-ui); }
 
         /* --- Draggable Windows --- */
         .window {
@@ -91,39 +90,28 @@
             border-radius: 4px; z-index: 100; display: flex; flex-direction: column;
             box-shadow: 0 0 15px rgba(0,0,0,0.5);
             backdrop-filter: blur(4px);
-            transition: height 0.3s ease; /* Smooth collapse */
+            transition: opacity 0.2s;
         }
         .window-header {
             background: rgba(0, 243, 255, 0.1); padding: 10px; cursor: grab;
             display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333;
         }
-        .window-header:active { cursor: grabbing; }
-        .window-title { font-family: var(--font-ui); font-size: 12px; color: var(--neon-cyan); margin: 0; }
-        
-        /* コンテンツエリア（折りたたみ用） */
-        .window-content-wrapper {
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            max-height: 80vh; /* Open state default */
-        }
-        .window-content-wrapper.collapsed {
-            max-height: 0 !important;
-        }
+        .window-content-wrapper { overflow: hidden; transition: max-height 0.3s ease-out; max-height: 80vh; }
+        .window-content-wrapper.collapsed { max-height: 0 !important; }
         .window-content { padding: 10px; overflow-y: auto; max-height: 60vh; }
-
-        /* Toggle Icon Rotation */
-        .toggle-icon { transition: transform 0.3s; cursor: pointer; color: #888; padding: 0 5px; }
+        .window-title { font-family: var(--font-ui); font-size: 12px; color: var(--neon-cyan); }
+        .toggle-icon { transition: transform 0.3s; cursor: pointer; color: #888; padding: 0 8px; }
         .toggle-icon.rotated { transform: rotate(180deg); }
 
-        /* Window Positioning (Desktop Default) */
+        /* Window Positions */
         #panel-feed { top: 60px; left: 20px; width: 300px; }
         #panel-post { top: 60px; left: 340px; width: 300px; display: none; }
         #panel-utility { top: 60px; right: 20px; width: 250px; }
 
         /* News List */
-        .news-item { padding: 10px 8px; border-bottom: 1px solid #333; cursor: pointer; font-size: 12px; transition: 0.2s; color: #ccc; }
+        .news-item { padding: 12px 8px; border-bottom: 1px solid #333; cursor: pointer; font-size: 13px; color: #ccc; }
         .news-item:hover { background: rgba(0, 243, 255, 0.15); color: #fff; padding-left: 12px; }
-        .badge { font-size: 9px; padding: 2px 4px; border-radius: 2px; margin-right: 5px; color:#000; font-weight:bold; display:inline-block; width: 60px; text-align: center;}
+        .badge { font-size: 10px; padding: 3px 6px; border-radius: 2px; margin-right: 5px; color:#000; font-weight:bold; display:inline-block; width: 70px; text-align: center; font-family: var(--font-body);}
         .timestamp { display: block; font-size: 10px; color: var(--neon-cyan); margin-top: 4px; text-align: right; opacity: 0.7; font-family: var(--font-ui); }
 
         /* Menu Bar */
@@ -131,34 +119,21 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 45px;
             background: rgba(0,0,0,0.9); border-bottom: 1px solid #333;
             display: flex; align-items: center; padding: 0 10px; z-index: 200;
-            overflow-x: auto; white-space: nowrap; /* Mobile Scroll */
+            overflow-x: auto; white-space: nowrap;
         }
-        /* Hide scrollbar */
         #menubar::-webkit-scrollbar { display: none; }
-        
         .menu-btn { 
             background: transparent; border: 1px solid #444; color: var(--text-dim); 
             padding: 6px 14px; margin-right: 8px; cursor: pointer; font-size: 11px; 
             transition: 0.3s; flex-shrink: 0; 
         }
-        .menu-btn:hover, .menu-btn.active { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
+        .menu-btn:hover { background: var(--neon-cyan); color: #000; }
 
         /* Utility & Calendar */
         #clock { font-family: var(--font-ui); font-size: 24px; text-align: center; color: #fff; text-shadow: 0 0 5px var(--neon-cyan); margin-bottom: 10px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 10px; margin-bottom: 10px; }
-        .cal-header { color: var(--neon-cyan); font-weight: bold; padding-bottom: 5px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 10px; }
         .cal-day { padding: 6px 2px; background: rgba(255,255,255,0.05); color: #aaa; }
-        .cal-today { background: var(--neon-cyan); color: #000; font-weight: bold; border: 1px solid #fff; }
-        
-        /* Todo */
-        #todo-list { list-style: none; padding: 0; margin: 10px 0; }
-        .todo-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px; margin-bottom: 4px; 
-            background: rgba(255,255,255,0.1); border-left: 2px solid var(--neon-cyan);
-            font-size: 12px; color: #fff; animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+        .cal-today { background: var(--neon-cyan); color: #000; font-weight: bold; }
 
         /* Guide */
         #guide {
@@ -168,34 +143,38 @@
             border-right: 2px solid var(--neon-cyan); pointer-events: none;
         }
 
-        /* --- Mobile Responsive Styles --- */
+        /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 768px) {
-            /* Adjust Map controls */
-            .cesium-viewer-bottom { display: none; } 
-
-            /* Windows take almost full width and stack */
+            .cesium-viewer-bottom, #guide { display: none; }
             .window { 
-                width: 94% !important; 
-                left: 3% !important; 
-                top: 60px !important; /* Reset dragged positions */
-                max-height: 80vh;
+                width: 94% !important; left: 3% !important; top: 55px !important;
+                max-height: 70vh;
             }
-            /* Stagger initial display so they don't completely overlap if all open */
-            #panel-feed { z-index: 101; }
-            #panel-post { top: 100px !important; z-index: 102; }
-            #panel-utility { top: 140px !important; z-index: 103; }
-
-            /* Signboard responsive */
-            #signboard-card { width: 90vw; }
-            
-            /* Hide Guide on mobile to save space */
-            #guide { display: none; }
-
-            /* Larger touch targets */
-            .menu-btn { padding: 10px 15px; font-size: 12px; }
-            input, select, textarea { font-size: 16px; /* Prevent iOS zoom */ }
-            .news-item { padding: 15px 10px; }
-            #signboard-close { padding: 10px 15px; font-size: 18px; }
+            #signboard-container {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                top: auto !important;
+                width: 100% !important;
+                transform: none !important;
+                display: flex;
+                justify-content: center;
+                align-items: flex-end;
+                padding-bottom: 20px;
+                pointer-events: none;
+            }
+            .signboard-offset { transform: none; padding-bottom: 0; width: 100%; align-items: center; }
+            #signboard-pole { display: none; }
+            #signboard-card {
+                width: 92%; border-bottom: none; border-radius: 12px;
+                box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
+                pointer-events: auto;
+                background: rgba(10, 15, 25, 0.95);
+            }
+            #signboard-close { padding: 15px; font-size: 20px; }
+            .menu-btn { padding: 8px 16px; font-size: 12px; }
+            .news-item { padding: 16px 10px; }
+            input, select, textarea { font-size: 16px; }
         }
     </style>
 </head>
@@ -203,15 +182,14 @@
     <div id="cesiumContainer"></div>
     
     <div id="guide">
-        <span style="color:var(--neon-cyan); font-weight:bold;">WASD: MOVE (Shift=BOOST)</span><br>
-        Middle Drag: PAN<br>
-        Right Drag: ROTATE<br>
-        Wheel: ZOOM<br>
-        Left Click: STOP / SELECT
+        <span style="color:var(--neon-cyan); font-weight:bold;">CONTROLS</span><br>
+        L-Drag: PAN / MOVE<br>
+        R-Drag: ROTATE / TILT<br>
+        Wheel: ZOOM
     </div>
 
     <div id="menubar">
-        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v10.8</div>
+        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v10.95</div>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-feed')">NEWS</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-post')">POST</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-utility')">SYSTEM</button>
@@ -262,30 +240,23 @@
         <div id="post-wrapper" class="window-content-wrapper">
             <div class="window-content">
                 <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <input type="text" id="addressInput" placeholder="Search Area (e.g. Shibuya)">
+                    <input type="text" id="addressInput" placeholder="エリア検索 (例: 渋谷)">
                     <button onclick="App.searchAddress()" style="width:30%;background:#333;color:#fff;border:1px solid #444;">GO</button>
                 </div>
                 <hr style="border-color:#333;">
-                
-                <label style="font-size:10px; color:#888;">CATEGORY</label>
                 <select id="inputCat">
-                    <option value="entertainment">ENTERTAINMENT</option>
-                    <option value="economy">ECONOMY</option>
-                    <option value="incident">INCIDENT</option>
-                    <option value="politics">POLITICS</option>
+                    <option value="entertainment">エンタメ</option>
+                    <option value="economy">経済</option>
+                    <option value="incident">事件</option>
+                    <option value="politics">政治</option>
                 </select>
-                
-                <label style="font-size:10px; color:#888;">LOCATION</label>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="inputLat" placeholder="Lat">
-                    <input type="text" id="inputLon" placeholder="Lon">
+                    <input type="text" id="inputLat" placeholder="緯度 (Lat)">
+                    <input type="text" id="inputLon" placeholder="経度 (Lon)">
                 </div>
-                
-                <label style="font-size:10px; color:#888;">CONTENT</label>
-                <input type="text" id="inputTitle" placeholder="Title">
-                <input type="text" id="inputImgUrl" placeholder="Image URL (Optional)">
-                <textarea id="inputBody" rows="3" placeholder="Body..."></textarea>
-                
+                <input type="text" id="inputTitle" placeholder="タイトル">
+                <input type="text" id="inputImgUrl" placeholder="画像URL (任意)">
+                <textarea id="inputBody" rows="3" placeholder="本文..."></textarea>
                 <button class="action-btn" onclick="App.addNewsFromForm()">UPLOAD DATA</button>
             </div>
         </div>
@@ -306,7 +277,7 @@
                 <div class="calendar-grid" id="calendar-container"></div>
                 <div style="font-size:11px; color:#888; margin:10px 0 5px;">TASKS</div>
                 <div style="display:flex; gap:2px;">
-                    <input type="text" id="todo-input" placeholder="New Task...">
+                    <input type="text" id="todo-input" placeholder="タスク入力...">
                     <button style="width:30px; cursor:pointer; background:#333; color:#fff; border:1px solid #555;" onclick="App.addTodo()">+</button>
                 </div>
                 <ul id="todo-list"></ul>
@@ -315,15 +286,13 @@
     </div>
 
     <script>
-        // --- Configuration & State ---
         const CONFIG = {
-            // ★★★ セキュリティ: ここにご自身のCesiumトークンを入れてください ★★★
-            cesiumToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNGYxNTA0NC05YjkyLTQwMDEtODAyNS1iNWU1MWMzOTExN2YiLCJpZCI6MzYxNjM4LCJpYXQiOjE3NjM1MTczMzd9.p33ZKkhH-eN-nTJsvfmVNyVZDjIhwwGZMx2PxAc6dig', 
+            cesiumToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNGYxNTA0NC05YjkyLTQwMDEtODAyNS1iNWU1MWMzOTExN2YiLCJpZCI6MzYxNjM4LCJpYXQiOjE3NjM1MTczMzd9.p33ZKkhH-eN-nTJsvfmVNyVZDjIhwwGZMx2PxAc6dig', // ★ Set Token Here
             categories: {
-                'incident': { color: '#ff3333', cesium: Cesium.Color.RED },
-                'economy': { color: '#bd00ff', cesium: Cesium.Color.PURPLE },
-                'entertainment': { color: '#f1c40f', cesium: Cesium.Color.GOLD },
-                'politics': { color: '#00ff41', cesium: Cesium.Color.LIME }
+                'incident': { label: '事件', color: '#ff3333', cesium: Cesium.Color.RED },
+                'economy': { label: '経済', color: '#bd00ff', cesium: Cesium.Color.PURPLE },
+                'entertainment': { label: 'エンタメ', color: '#f1c40f', cesium: Cesium.Color.GOLD },
+                'politics': { label: '政治', color: '#00ff41', cesium: Cesium.Color.LIME }
             }
         };
 
@@ -333,162 +302,122 @@
             currentTargetPos: null,
             currentPages: [],
             currentPageIndex: 0,
-            newsData: []
+            newsData: [],
+            isMobile: window.innerWidth < 768
         };
 
         // --- UI Utilities ---
         const UI = {
             toggleWindow: (id) => {
                 const el = document.getElementById(id);
-                // Flex指定に戻すか非表示にするか
                 if (getComputedStyle(el).display === 'none') {
                     el.style.display = 'flex';
-                    // 重なり順を一番上に
                     UI.bringToFront(el);
                 } else {
                     el.style.display = 'none';
                 }
             },
-            
-            // 折りたたみ機能（汎用化）
             toggleContent: (wrapperId, iconEl) => {
-                const wrapper = document.getElementById(wrapperId);
-                wrapper.classList.toggle('collapsed');
-                // アイコンの回転
+                document.getElementById(wrapperId).classList.toggle('collapsed');
                 if (iconEl) iconEl.classList.toggle('rotated');
             },
-
             bringToFront: (el) => {
                 document.querySelectorAll('.window').forEach(w => w.style.zIndex = 100);
                 el.style.zIndex = 101;
             },
-
             makeDraggable: (el) => {
                 let isDragging = false, startX, startY, initialLeft, initialTop;
                 const win = el.parentElement;
-
-                // Mouse & Touch events handled specifically for dragging
-                const startDrag = (clientX, clientY) => {
-                    isDragging = true;
-                    startX = clientX;
-                    startY = clientY;
+                const startDrag = (cx, cy) => {
+                    isDragging = true; startX = cx; startY = cy;
                     const rect = win.getBoundingClientRect();
-                    initialLeft = rect.left;
-                    initialTop = rect.top;
+                    initialLeft = rect.left; initialTop = rect.top;
                     UI.bringToFront(win);
                 };
-
-                el.addEventListener('mousedown', (e) => {
-                    startDrag(e.clientX, e.clientY);
-                    e.preventDefault(); 
-                });
+                el.addEventListener('mousedown', e => { startDrag(e.clientX, e.clientY); e.preventDefault(); });
+                el.addEventListener('touchstart', e => { startDrag(e.touches[0].clientX, e.touches[0].clientY); }, {passive: false});
                 
-                // Touch support for drag
-                el.addEventListener('touchstart', (e) => {
-                    const touch = e.touches[0];
-                    startDrag(touch.clientX, touch.clientY);
-                    // e.preventDefault(); // Allow scrolling if not dragging? No, header drag should block scroll
-                }, {passive: false});
-
-                const moveDrag = (clientX, clientY) => {
+                const moveDrag = (cx, cy) => {
                     if (!isDragging) return;
-                    const dx = clientX - startX;
-                    const dy = clientY - startY;
-                    win.style.left = `${initialLeft + dx}px`;
-                    win.style.top = `${initialTop + dy}px`;
+                    win.style.left = `${initialLeft + (cx - startX)}px`;
+                    win.style.top = `${initialTop + (cy - startY)}px`;
                 };
-
-                document.addEventListener('mousemove', (e) => moveDrag(e.clientX, e.clientY));
-                document.addEventListener('touchmove', (e) => {
-                    if(isDragging) {
-                        const touch = e.touches[0];
-                        moveDrag(touch.clientX, touch.clientY);
-                        e.preventDefault(); // Prevent page scroll while dragging window
-                    }
-                }, {passive: false});
-
+                document.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+                document.addEventListener('touchmove', e => { if(isDragging) { moveDrag(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, {passive: false});
+                
                 const endDrag = () => isDragging = false;
                 document.addEventListener('mouseup', endDrag);
                 document.addEventListener('touchend', endDrag);
             }
         };
-
-        // Initialize Draggable
         document.querySelectorAll('.window-header').forEach(h => UI.makeDraggable(h));
 
-        // --- Cesium Initialization ---
-        Cesium.Ion.defaultAccessToken = CONFIG.cesiumToken; 
-
+        // --- Cesium Init (Map Controls Optimized) ---
+        Cesium.Ion.defaultAccessToken = CONFIG.cesiumToken;
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrainProvider: Cesium.createWorldTerrain(),
             timeline: false, animation: false, baseLayerPicker: false,
             geocoder: false, homeButton: false, infoBox: false, sceneModePicker: false,
-            selectionIndicator: false,
-            navigationHelpButton: false,
-            fullscreenButton: false
+            selectionIndicator: false, navigationHelpButton: false, fullscreenButton: false
         });
         const scene = viewer.scene;
         const camera = viewer.camera;
         
-        // Performance & Look Settings
         scene.backgroundColor = Cesium.Color.BLACK;
-        scene.fog.enabled = true;
-        scene.fog.density = 0.0005;
-        scene.globe.enableLighting = false;
-        scene.sun.show = false;
-        scene.skyBox.show = false;
+        scene.fog.enabled = true; scene.fog.density = 0.0005;
+        scene.globe.enableLighting = false; scene.sun.show = false; scene.skyBox.show = false;
 
-        // Controller Settings
         const sscc = scene.screenSpaceCameraController;
         sscc.enableTranslate = true;
-        sscc.enableRotate = true;
+        sscc.translateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
         sscc.enableZoom = true;
-        sscc.enableTilt = true;
-        sscc.enableLook = false;
-        sscc.rotateEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];
-        sscc.tiltEventTypes = [Cesium.CameraEventType.RIGHT_DRAG];
         sscc.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
-        sscc.translateEventTypes = [Cesium.CameraEventType.MIDDLE_DRAG];
-
-        // Load Buildings
+        sscc.enableRotate = true;
+        sscc.rotateEventTypes = [Cesium.CameraEventType.RIGHT_DRAG, Cesium.CameraEventType.PINCH]; 
+        sscc.tiltEventTypes = [Cesium.CameraEventType.PINCH, Cesium.CameraEventType.RIGHT_DRAG];
+        
         async function loadBuildings() {
             try {
                 const tileset = await Cesium.createOsmBuildings();
                 scene.primitives.add(tileset);
                 tileset.style = new Cesium.Cesium3DTileStyle({
-                    color: { conditions: [['true', "color('cyan', 0.6)"]] },
-                    show: true
+                    color: { conditions: [['true', "color('cyan', 0.6)"]] }, show: true
                 });
-                // Start at Tokyo Station
                 camera.flyTo({
                     destination: Cesium.Cartesian3.fromDegrees(139.767, 35.681, 1500),
                     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45) }
                 });
-            } catch (e) { console.error("Building load error:", e); }
+            } catch (e) { console.error(e); }
         }
         loadBuildings();
 
-        // --- Application Logic ---
+        // --- Logic ---
         const App = {
-            // Initial Data (Added 'time')
+            // Data restored to ~20 items with Japanese categories and longer text
             initData: [
-                { id:1, lat:35.6938, lon:139.7448, cat:'entertainment', time: "10:42", title:"千鳥ヶ淵の桜、早期開花予想", body:"暖冬の影響で例年より1週間早い開花が予想されています。", img:"https://placehold.co/600x400/f1c40f/000000?text=Sakura" },
-                { id:2, lat:35.6984, lon:139.7731, cat:'entertainment', time: "09:15", title:"秋葉原eスポーツ施設開業", body:"駅前に最大級の施設が誕生しました。", img:"https://placehold.co/600x400/f1c40f/000000?text=eSports" },
-                { id:3, lat:35.6852, lon:139.7528, cat:'incident', time: "08:30", title:"霞が関で通信障害発生", body:"【速報】官庁街の一部で大規模なネットワーク障害が発生中。", img:"https://placehold.co/600x400/ff3333/ffffff?text=ERROR" },
-                { id:4, lat:35.6812, lon:139.7671, cat:'economy', time: "Yesterday", title:"東京駅110周年記念", body:"記念グッズ販売に行列。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=TokyoSt" },
-                { id:5, lat:35.6865, lon:139.7637, cat:'economy', time: "Yesterday", title:"大手町Tech Base始動", body:"AIスタートアップ支援拠点。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=Tech" },
-                { id:6, lat:35.6917, lon:139.7709, cat:'entertainment', time: "Yesterday", title:"神田カレーグランプリ", body:"老舗洋食店が初の栄冠。", img:"https://placehold.co/600x400/f1c40f/000000?text=Curry" },
-                { id:7, lat:35.6759, lon:139.7448, cat:'politics', time: "2 days ago", title:"国会議事堂夜間ツアー", body:"夜間公開を試験導入。", img:"https://placehold.co/600x400/00ff41/000000?text=Diet" },
-                { id:8, lat:35.6736, lon:139.7560, cat:'entertainment', time: "2 days ago", title:"日比谷公園ガーデニング", body:"春の新作展示会。", img:"https://placehold.co/600x400/f1c40f/000000?text=Garden" },
-                { id:9, lat:35.7001, lon:139.7714, cat:'economy', time: "3 days ago", title:"レトロゲーム市場高騰", body:"海外客の需要爆発。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=Retro" },
-                { id:10, lat:35.6944, lon:139.7433, cat:'entertainment', time: "3 days ago", title:"靖国神社「夜桜能」", body:"3年ぶりの復活。", img:"https://placehold.co/600x400/f1c40f/000000?text=Noh" }
+                { id:1, lat:35.6938, lon:139.7448, cat:'entertainment', time: "10:42", title:"千鳥ヶ淵の桜、早期開花予想", body:"暖冬の影響で例年より1週間早い開花が予想されています。気象庁の最新の観測データによると、東京都心の積算温度は過去10年で最も高いペースで推移しており、千鳥ヶ淵のソメイヨシノも蕾が大きく膨らみ始めています。周辺のライトアップイベントも前倒しで開催されることが決定し、運営委員会は急ピッチで準備を進めています。夜桜観賞船の予約は既に開始されており、週末のチケットは争奪戦が予想されます。", img:"https://image.walkerplus.com/wpimg/walkertouch/wtd/images/l2/268816.jpg" },
+                { id:2, lat:35.6984, lon:139.7731, cat:'entertainment', time: "09:15", title:"秋葉原eスポーツ施設開業", body:"駅前に国内最大級のeスポーツ専用複合施設「AKB CYBER ARENA」が本日グランドオープンを迎えました。全フロアに超高速5G通信環境を完備し、最新のハイエンドゲーミングPCを500台設置。オープニングイベントには世界的なプロゲーマーチームが招待され、エキシビションマッチが行われています。施設内にはVR体験ゾーンや配信スタジオも併設されており、次世代のエンターテインメント発信基地として期待が高まっています。", img:"https://resources.matcha-jp.com/resize/720x2000/2024/09/27-199411.webp" },
+                { id:3, lat:35.6852, lon:139.7528, cat:'incident', time: "08:30", title:"霞が関で通信障害発生", body:"【速報】午前8時頃より、霞が関の官庁街エリアを中心とした一部地域で大規模な通信障害が発生しています。複数の省庁で内部ネットワークへの接続が不安定になっており、業務に支障が出始めています。現在、原因は調査中ですが、通信事業者によると物理的な回線切断の可能性は低く、ソフトウェアの不具合あるいは外部からのサイバー攻撃の可能性も含めて慎重に確認を進めているとのことです。復旧の目処は立っていません。", img:"https://skyticket.jp/guide/wp-content/uploads/c530e76c-pixta_41961206-1200x675.jpg?imwidth=400" },
+                { id:4, lat:35.6812, lon:139.7671, cat:'economy', time: "Yesterday", title:"東京駅110周年記念", body:"東京駅が開業110周年を迎え、記念式典と限定グッズの販売会が丸の内駅舎前で行われました。早朝5時から熱心な鉄道ファンや観光客で行列ができ、整理券は配布開始からわずか30分で終了する盛況ぶりでした。記念硬券セットや、100年前の駅舎をデザインした限定Suicaが飛ぶように売れています。また、駅構内の商業施設では「東京駅グルメフェス」も同時開催され、限定メニューを求める人々で賑わいを見せています。", img:"https://image.news.livedoor.com/newsimage/4/b/4baa2_249_2010-03-12-114351.jpg" },
+                { id:5, lat:35.6865, lon:139.7637, cat:'economy', time: "Yesterday", title:"大手町Tech Base始動", body:"大手町エリアの再開発地区に、AIスタートアップ支援に特化した拠点「Otemachi Tech Base」が本格始動しました。政府と民間企業が共同で出資し、有望なベンチャー企業に対してオフィススペースの無償提供や、大企業とのマッチング支援を行います。開所式には経済産業大臣も出席し、「ここから次のユニコーン企業を生み出す」と力強く宣言しました。既に50社以上の入居が決まっており、日本のイノベーションの中心地となることが期待されています。", img:"https://umekita-tech-base.jp/wp-content/uploads/2025/06/IMG_8319-1024x768.jpg" },
+                { id:6, lat:35.6917, lon:139.7709, cat:'entertainment', time: "Yesterday", title:"神田カレーグランプリ", body:"年に一度のカレーの祭典「神田カレーグランプリ」の決勝戦が行われ、創業70年の老舗洋食店が悲願の初優勝を飾りました。今年のテーマは「スパイスと出汁の融合」で、各店が趣向を凝らした一皿を提供。優勝した店舗の「特製欧風魚介カレー」は、投票者の圧倒的な支持を集めました。会場周辺にはスパイシーな香りが漂い、約5万人の来場者が食べ比べを楽しみました。優勝店には早速長蛇の列ができています。", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1HG6dETR65_yNB6CzuybfvDtLK9moY9sBRYF14YdPtZo52Vai7rY8tb2D-UvIlr9CUlo&usqp=CAhttps://chuosuki.jp/wp/wp-content/uploads/2025/09/KCG-main2025.png" },
+                { id:7, lat:35.6759, lon:139.7448, cat:'politics', time: "2 days ago", title:"国会議事堂夜間ツアー", body:"国会議事堂の魅力をより多くの人に知ってもらうため、初の試みとなる「夜間特別見学ツアー」が試験的に導入されました。通常は見学できない夜の時間帯に、ライトアップされた議事堂内部や本会議場を見学できるプレミアムな体験です。定員制のツアーは募集開始直後に満席となり、参加者からは「昼間とは違う荘厳な雰囲気に感動した」との声が聞かれました。好評を受け、参議院事務局は定例化を検討しています。", img:"https://www.matsushitas-lighting.com/images/kokkai.jpg" },
+                { id:8, lat:35.6736, lon:139.7560, cat:'entertainment', time: "2 days ago", title:"日比谷公園ガーデニング", body:"日比谷公園にて国内最大規模のガーデニングショーが開幕しました。全国から集まった造園家たちが、限られたスペースの中に小宇宙を表現する「箱庭コンテスト」が見どころです。今年のトレンドは「サステナブルな庭造り」で、廃材を利用したアートや、節水型の植物配置などが注目を集めています。夜間はLEDによるイルミネーション演出も行われ、幻想的な植物の世界を楽しむことができます。", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjTLa4z2nvDBHkXwJ5KjMwuhcE8afoaJwNkw&s" },
+                { id:9, lat:35.7001, lon:139.7714, cat:'economy', time: "3 days ago", title:"レトロゲーム市場高騰", body:"秋葉原のレトロゲーム専門店で、海外からの観光客による需要爆発が続いています。特に1990年代のゲームソフトやハードウェアが「芸術品」として評価され、価格が高騰中。未開封の希少ソフトが数百万円で取引されるケースも珍しくありません。店長は「倉庫に眠っていた在庫が一瞬でなくなる勢いだ」と嬉しい悲鳴を上げています。円安の影響も相まって、このブームは当面続くと見られています。", img:"https://rocketnews24.com/wp-content/uploads/sites/2/2021/06/%E5%90%8D%E7%A7%B0%E6%9C%AA%E8%A8%AD%E5%AE%9A-3.jpg" },
+                { id:10, lat:35.6944, lon:139.7433, cat:'entertainment', time: "3 days ago", title:"靖国神社「夜桜能」", body:"靖国神社の能楽堂にて、春の恒例行事「夜桜能」が3年ぶりに通常開催されました。満開の桜の下、篝火に照らされた舞台で演じられる幽玄な能楽の世界に、集まった観客は酔いしれました。今年は人間国宝による特別な演目も披露され、静寂の中に響く鼓の音と謡が、都会の喧騒を忘れさせる特別な時間を作り出しました。海外からのVIP客も多く訪れ、日本の伝統芸能への関心の高さが伺えます。", img:"https://placehold.co/600x400/f1c40f/000000?text=Noh" },
+                { id:11, lat:35.6837, lon:139.7382, cat:'economy', time: "4 days ago", title:"麹町オフィス需要回復", body:"リモートワークの普及で一時低迷していた麹町エリアのオフィス需要が、急速に回復しています。セキュリティの高さや官庁街へのアクセスの良さが再評価され、士業やコンサルティングファームの移転が相次いでいます。不動産調査会社のレポートによると、このエリアの空室率は前年同月比で2ポイント改善し、賃料も上昇傾向にあります。築年数の古いビルのリノベーション計画も多数進行中です。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=Office" },
+                { id:12, lat:35.6750, lon:139.7630, cat:'economy', time: "4 days ago", title:"有楽町アンテナショップ", body:"有楽町駅前の再開発に伴い、全国の自治体アンテナショップを集約した大型商業施設「JAPAN LOCAL PLAZA」の建設計画が発表されました。これまで点在していた各県のショップを一箇所に集めることで、集客の相乗効果を狙います。施設内には全国の地酒が楽しめるバーや、産地直送の野菜マーケットも設置される予定。2027年の完成を目指しており、地方創生の新たな拠点として期待されています。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=Shop" },
+                { id:13, lat:35.6933, lon:139.7507, cat:'entertainment', time: "5 days ago", title:"北の丸公園紅葉情報", body:"（季節外れのニュースですが）北の丸公園の管理事務所は、今年の紅葉の見頃予想を発表しました。例年より色づきが良く、特にモミジ林の鮮やかさは過去最高レベルになるとのことです。科学技術館周辺のイチョウ並木も黄金色に染まりつつあり、カメラを手にした多くの写真愛好家が訪れています。週末には落ち葉を使った子供向けのアートワークショップも開催される予定です。", img:"https://placehold.co/600x400/f1c40f/000000?text=Momiji" },
+                { id:14, lat:35.7020, lon:139.7679, cat:'entertainment', time: "5 days ago", title:"神田明神節分祭", body:"神田明神にて盛大な節分祭が執り行われました。今年は人気俳優や力士、アニメキャラクターなどが豆まきに参加し、境内は立錐の余地もないほどの人出となりました。「鬼は外、福は内」の掛け声とともに撒かれた福豆を求め、参拝客が手を伸ばす姿が見られました。撒かれた豆の中には当たりくじ付きのものもあり、受け取った人には地域の商店街で使える商品券がプレゼントされました。", img:"https://placehold.co/600x400/f1c40f/000000?text=Setubun" },
+                { id:15, lat:35.6764, lon:139.7637, cat:'entertainment', time: "6 days ago", title:"国際フォーラム映像祭", body:"東京国際フォーラムのガラス棟全体を使った、大規模なプロジェクションマッピング映像祭が開催されています。巨大な船のような建築の曲面を生かし、深海や宇宙をテーマにしたダイナミックな映像が投影されています。通りがかるビジネスマンも足を止め、その圧倒的なスケールに見入っていました。使用される電力はすべて再生可能エネルギーで賄われており、環境に配慮したアートイベントとしても注目されています。", img:"https://placehold.co/600x400/f1c40f/000000?text=Art" },
+                { id:16, lat:35.6933, lon:139.7498, cat:'politics', time: "6 days ago", title:"武道館周辺改修完了", body:"日本武道館周辺の公園整備工事が完了し、本日より一般開放されました。今回の改修では、車椅子利用者や高齢者に配慮したバリアフリー化が徹底されており、スロープの増設や多目的トイレの拡充が行われました。また、災害時の避難場所としての機能も強化され、ソーラー充電式の街灯やマンホールトイレも新たに設置されています。誰もが安心して利用できる憩いの場として生まれ変わりました。", img:"https://placehold.co/600x400/00ff41/000000?text=Budokan" },
+                { id:17, lat:35.6811, lon:139.7368, cat:'entertainment', time: "1 week ago", title:"紀尾井町スイーツフェア", body:"紀尾井町のホテルニューオータニ周辺で、春のスイーツフェアが開催されています。今年は「桜と苺」をテーマに、各パティスリーが芸術的なケーキやパフェを競作。特に、1個3000円を超える高級ショートケーキは、発売開始から1時間で完売するほどの人気ぶりです。期間中はスタンプラリーも行われ、全店舗を制覇した強者にはホテル宿泊券などの豪華賞品が当たるチャンスがあります。", img:"https://placehold.co/600x400/f1c40f/000000?text=Cake" },
+                { id:18, lat:35.6940, lon:139.7536, cat:'incident', time: "1 week ago", title:"九段下で水道管破裂", body:"九段下交差点付近で老朽化した水道管が破裂し、道路の一部が冠水する事故が発生しました。水柱は一時3メートルの高さまで上がり、周辺道路は通行止めとなりました。水道局の緊急車両が到着し、現在はバルブを閉めて止水作業を行っていますが、近隣のビルの一部で断水が発生しています。通勤時間帯と重なったため、地下鉄の出入り口にも影響が出ており、現場は一時騒然としました。", img:"https://placehold.co/600x400/ff3333/ffffff?text=Water" },
+                { id:19, lat:35.6689, lon:139.7598, cat:'economy', time: "1 week ago", title:"新橋SL広場リニューアル", body:"サラリーマンの聖地として知られる新橋駅前のSL広場が、リニューアル工事を終えて公開されました。象徴であるSLはそのままに、周囲にウッドデッキやベンチが増設され、より滞在しやすい空間になっています。夜間はSL自体がライトアップされ、定時には汽笛の音とともに蒸気（ミスト）が出る演出も追加されました。待ち合わせスポットとしての利便性が向上し、新たな観光名所となりそうです。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=SL" },
+                { id:20, lat:35.6896, lon:139.6917, cat:'politics', time: "1 week ago", title:"都庁プロジェクション", body:"東京都庁第一本庁舎の壁面を利用したプロジェクションマッピングの通年上映がスタートしました。ギネス世界記録にも認定された世界最大級の常設展示で、毎晩異なるコンテンツが上映されます。観光客誘致の切り札として期待されており、初日の昨夜は周辺の広場が観客で埋め尽くされました。光と音のスペクタクルショーは、東京の夜空を新たな色で彩っています。", img:"https://placehold.co/600x400/00ff41/000000?text=Gov" }
             ],
-
-            // Render a single item to Map & UI list
             renderItem: (item, prepend = false) => {
                 const cat = CONFIG.categories[item.cat];
-                
-                // 1. Add 3D Entity
                 viewer.entities.add({
                     position: Cesium.Cartesian3.fromDegrees(item.lon, item.lat, 50),
                     point: { pixelSize:12, color:cat.cesium, outlineColor:Cesium.Color.WHITE, outlineWidth:2 },
@@ -501,35 +430,23 @@
                     properties: { newsData: item }
                 });
 
-                // 2. Add to DOM List (Include Timestamp)
                 const div = document.createElement('div');
                 div.className = 'news-item';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="badge" style="background:${cat.color}">${item.cat.toUpperCase()}</span>
-                    </div>
-                    <div style="margin-top:4px; font-weight:bold;">${item.title}</div>
-                    <span class="timestamp"><i class="far fa-clock"></i> ${item.time}</span>
-                `;
+                // Use Japanese label from CONFIG
+                div.innerHTML = `<span class="badge" style="background:${cat.color}">${cat.label}</span> <b>${item.title}</b><span class="timestamp">${item.time}</span>`;
                 div.onclick = () => {
-                    // スマホの場合はリストを閉じて地図を見せる（任意）
-                    if(window.innerWidth < 768) UI.toggleWindow('panel-feed');
+                    if(STATE.isMobile) UI.toggleWindow('panel-feed');
                     App.startOrbit(item);
                 };
-
                 const listEl = document.getElementById('news-list-content');
-                if(prepend) listEl.insertBefore(div, listEl.firstChild);
-                else listEl.appendChild(div);
+                if(prepend) listEl.insertBefore(div, listEl.firstChild); else listEl.appendChild(div);
             },
-
             initAllItems: () => {
                 STATE.newsData = [...App.initData];
                 viewer.entities.removeAll();
                 document.getElementById('news-list-content').innerHTML = '';
                 STATE.newsData.forEach(item => App.renderItem(item));
             },
-
-            // Search Logic
             searchAddress: async () => {
                 const q = document.getElementById('addressInput').value;
                 if (!q) return;
@@ -537,73 +454,48 @@
                     const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}`);
                     const d = await r.json();
                     if (d.length > 0) {
-                        const lat = parseFloat(d[0].lat);
-                        const lon = parseFloat(d[0].lon);
-                        document.getElementById('inputLat').value = lat;
-                        document.getElementById('inputLon').value = lon;
+                        const lat = parseFloat(d[0].lat), lon = parseFloat(d[0].lon);
+                        document.getElementById('inputLat').value = lat; document.getElementById('inputLon').value = lon;
                         camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1500) });
-                    } else {
-                        alert("Address not found.");
-                    }
+                    } else alert("Not found");
                 } catch (e) { console.error(e); }
             },
-
-            // Add New Logic with Auto Timestamp
             addNewsFromForm: () => {
                 const lat = parseFloat(document.getElementById('inputLat').value);
                 const lon = parseFloat(document.getElementById('inputLon').value);
                 const title = document.getElementById('inputTitle').value;
-                const body = document.getElementById('inputBody').value;
-                const cat = document.getElementById('inputCat').value;
-                const imgUrl = document.getElementById('inputImgUrl').value;
-
-                if (!lat || !lon || !title) { alert("Location and Title required."); return; }
-
-                // Generate Current Time
+                if (!lat || !lon || !title) { alert("必須項目が足りません"); return; }
+                
                 const now = new Date();
-                const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-
                 const newItem = {
-                    id: Date.now(), lat, lon, cat, title,
-                    body: body || "No details.",
-                    img: imgUrl || '',
-                    time: timeStr
+                    id: Date.now(), lat, lon, cat: document.getElementById('inputCat').value,
+                    title, body: document.getElementById('inputBody').value || "詳細情報はありません。", 
+                    img: document.getElementById('inputImgUrl').value || "",
+                    time: `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
                 };
-
                 STATE.newsData.unshift(newItem);
-                App.renderItem(newItem, true); 
-                
-                // Reset & Fly
-                document.getElementById('inputTitle').value = '';
-                document.getElementById('inputBody').value = '';
-                document.getElementById('inputImgUrl').value = '';
-                
-                // スマホなら投稿ウィンドウを閉じる
-                if(window.innerWidth < 768) UI.toggleWindow('panel-post');
-                
+                App.renderItem(newItem, true);
+                if(STATE.isMobile) UI.toggleWindow('panel-post');
                 camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(lon, lat, 1500) });
             },
-
-            // Orbit & Signboard Logic
             startOrbit: (item) => {
                 App.stopOrbit();
                 STATE.isOrbiting = true;
                 App.updateSignboard(item);
-                document.getElementById('signboard-container').style.display = 'block';
+                
+                document.getElementById('signboard-container').style.display = 'flex';
                 
                 STATE.currentTargetPos = Cesium.Cartesian3.fromDegrees(item.lon, item.lat, 50);
-                
                 const center = STATE.currentTargetPos;
-                // スマホの場合は少し遠目から見る
-                const distance = window.innerWidth < 768 ? 1800 : 1200;
-                const offset = new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-30), distance);
-
+                
+                const range = STATE.isMobile ? 1800 : 1200;
+                
                 camera.flyTo({
                     destination: center,
                     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-30), roll: 0 },
                     duration: 1.0,
                     complete: () => {
-                        camera.lookAt(center, offset);
+                        camera.lookAt(center, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-30), range));
                         if (!STATE.orbitRemoveListener) {
                             STATE.orbitRemoveListener = viewer.clock.onTick.addEventListener(() => {
                                 if (STATE.isOrbiting) camera.rotateRight(0.002);
@@ -612,152 +504,102 @@
                     }
                 });
             },
-
             stopOrbit: () => {
                 if (!STATE.isOrbiting) return;
                 STATE.isOrbiting = false;
-                if (STATE.orbitRemoveListener) {
-                    STATE.orbitRemoveListener();
-                    STATE.orbitRemoveListener = null;
-                }
+                if (STATE.orbitRemoveListener) { STATE.orbitRemoveListener(); STATE.orbitRemoveListener = null; }
                 camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
             },
-
             updateSignboard: (item) => {
                 const cat = CONFIG.categories[item.cat];
-                const els = {
-                    title: document.getElementById('signboard-title'),
-                    card: document.getElementById('signboard-card'),
-                    pole: document.getElementById('signboard-pole'),
-                    img: document.getElementById('signboard-img')
-                };
-
-                els.title.innerText = item.title;
-                els.title.style.color = cat.color;
-                els.card.style.borderColor = cat.color;
-                els.pole.style.background = cat.color;
-                els.pole.style.boxShadow = `0 0 10px ${cat.color}`;
+                document.getElementById('signboard-title').innerText = item.title;
+                document.getElementById('signboard-title').style.color = cat.color;
+                document.getElementById('signboard-card').style.borderColor = cat.color;
+                // Only show pole on desktop
+                if(!STATE.isMobile) {
+                    document.getElementById('signboard-pole').style.background = cat.color;
+                    document.getElementById('signboard-pole').style.display = 'block';
+                } else {
+                    document.getElementById('signboard-pole').style.display = 'none';
+                }
                 
-                if (item.img) { els.img.src = item.img; els.img.style.display = 'block'; } 
-                else { els.img.style.display = 'none'; }
-
-                document.querySelectorAll('.nav-btn').forEach(btn => btn.style.color = cat.color);
-
-                // 文字数調整（スマホは少なめに）
-                const charLimit = window.innerWidth < 768 ? 30 : 40;
-                STATE.currentPages = App.chunkString(item.body, charLimit);
+                const img = document.getElementById('signboard-img');
+                if(item.img){ img.src = item.img; img.style.display='block'; } else { img.style.display='none'; }
+                
+                document.querySelectorAll('.nav-btn').forEach(b => b.style.color = cat.color);
+                
+                // Text chunking - smaller chunks for mobile to encourage pagination
+                STATE.currentPages = App.chunkString(item.body, STATE.isMobile ? 50 : 80);
                 STATE.currentPageIndex = 0;
                 App.renderPage();
             },
-
             chunkString: (str, len) => {
                 const size = Math.ceil(str.length / len);
-                const r = Array(size);
-                let offset = 0;
-                for (let i = 0; i < size; i++) { r[i] = str.substr(offset, len); offset += len; }
+                const r = []; let offset=0;
+                for(let i=0; i<size; i++){ r.push(str.substr(offset, len)); offset+=len; }
                 return r.length ? r : [str];
             },
-
             renderPage: () => {
                 document.getElementById('signboard-text').innerText = STATE.currentPages[STATE.currentPageIndex];
                 document.getElementById('page-indicator').innerText = `${STATE.currentPageIndex + 1}/${STATE.currentPages.length}`;
                 document.getElementById('btn-prev').disabled = (STATE.currentPageIndex === 0);
                 document.getElementById('btn-next').disabled = (STATE.currentPageIndex === STATE.currentPages.length - 1);
             },
-
             paginateNews: (d) => {
                 const n = STATE.currentPageIndex + d;
-                if (n >= 0 && n < STATE.currentPages.length) {
-                    STATE.currentPageIndex = n;
-                    App.renderPage();
-                }
+                if (n >= 0 && n < STATE.currentPages.length) { STATE.currentPageIndex = n; App.renderPage(); }
             },
-
             closeSignboard: () => {
                 document.getElementById('signboard-container').style.display = 'none';
                 App.stopOrbit();
             },
-
             addTodo: () => {
-                const input = document.getElementById('todo-input');
-                const val = input.value;
+                const val = document.getElementById('todo-input').value;
                 if(val) {
                     const li = document.createElement('li');
+                    li.innerHTML = `<span>${val}</span><i class="fas fa-times" onclick="this.parentElement.remove()"></i>`;
                     li.className = 'todo-item';
-                    li.innerHTML = `<span>${val}</span><i class="fas fa-times" style="color:#ff3333;cursor:pointer;"></i>`;
-                    li.querySelector('i').onclick = () => li.remove();
                     document.getElementById('todo-list').appendChild(li);
-                    input.value = '';
+                    document.getElementById('todo-input').value = '';
                 }
             }
         };
 
-        // --- Initialization Calls ---
         App.initAllItems();
 
-        // Signboard Tracking Loop
         scene.postRender.addEventListener(() => {
             const sb = document.getElementById('signboard-container');
-            if (sb.style.display !== 'none' && STATE.currentTargetPos) {
+            if (sb.style.display === 'none') return;
+            if (STATE.isMobile) {
+                sb.style.opacity = 1; 
+                return;
+            }
+            if (STATE.currentTargetPos) {
                 const pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, STATE.currentTargetPos);
                 if (pos) {
                     sb.style.opacity = 1;
-                    sb.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`; 
+                    sb.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
                 } else {
                     sb.style.opacity = 0;
                 }
             }
         });
 
-        // Interaction Handlers
         const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
         handler.setInputAction(() => { if(STATE.isOrbiting) App.stopOrbit(); }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
-        handler.setInputAction(() => {
-            if(STATE.isOrbiting) App.stopOrbit();
-            else camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
-        }, Cesium.ScreenSpaceEventType.MIDDLE_DOWN);
-
-        handler.setInputAction(click => {
-            const picked = scene.pick(click.position);
-            if (Cesium.defined(picked) && picked.id?.properties?.newsData) {
-                App.startOrbit(picked.id.properties.newsData.getValue());
-            }
+        handler.setInputAction(c => {
+            const picked = scene.pick(c.position);
+            if (Cesium.defined(picked) && picked.id?.properties?.newsData) App.startOrbit(picked.id.properties.newsData.getValue());
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-        // Clock
         setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+        window.addEventListener('resize', () => { STATE.isMobile = window.innerWidth < 768; });
 
-        // Generate Calendar
-        (function generateCalendar(){
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            
-            document.getElementById('cal-month-display').innerText = `${year}.${month+1}`;
-            
-            const container = document.getElementById('calendar-container');
-            const fragment = document.createDocumentFragment();
-            
-            ['S','M','T','W','T','F','S'].forEach(d => {
-                const div = document.createElement('div');
-                div.className = 'cal-header';
-                div.innerText = d;
-                fragment.appendChild(div);
-            });
-            
-            for(let i=0; i<firstDayIndex; i++) fragment.appendChild(document.createElement('div'));
-            
-            for(let i=1; i<=daysInMonth; i++){
-                const div = document.createElement('div');
-                div.className = `cal-day ${i===now.getDate() ? 'cal-today' : ''}`;
-                div.innerText = i;
-                fragment.appendChild(div);
-            }
-            container.innerHTML = '';
-            container.appendChild(fragment);
-        })();
+        const now = new Date(), cal = document.getElementById('calendar-container');
+        ['S','M','T','W','T','F','S'].forEach(d => cal.innerHTML += `<div class="cal-header">${d}</div>`);
+        for(let i=0; i<new Date(now.getFullYear(), now.getMonth(), 1).getDay(); i++) cal.innerHTML+='<div></div>';
+        for(let i=1; i<=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate(); i++) 
+            cal.innerHTML += `<div class="cal-day ${i===now.getDate()?'cal-today':''}">${i}</div>`;
     </script>
 </body>
 </html>
