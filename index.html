@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEO TOKYO OS v10.95 (JP Localized)</title>
+    <title>NEO TOKYO OS v10.9 (Mobile Optimized)</title>
     
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -44,11 +44,13 @@
         /* --- Signboard (Desktop: 3D Label / Mobile: Bottom Sheet) --- */
         #signboard-container {
             position: absolute; top: 0; left: 0; display: none; z-index: 150;
-            pointer-events: none; 
+            pointer-events: none; /* Click-through for container */
+            /* Default Desktop Styles */
             transform: translate3d(0, 0, 0); 
             will-change: transform;
         }
 
+        /* Wrapper for 3D positioning offset */
         .signboard-offset {
             transform: translate(-50%, -100%);
             padding-bottom: 50px; 
@@ -75,9 +77,9 @@
             padding: 10px 12px; background: rgba(255,255,255,0.05); border-bottom: 1px solid #444;
             display: flex; justify-content: space-between; align-items: center;
         }
-        #signboard-title { font-family: var(--font-body); font-size: 14px; font-weight: bold; color: #fff; } /* 日本語タイトル用にフォント変更 */
+        #signboard-title { font-family: var(--font-ui); font-size: 14px; font-weight: bold; color: #fff; }
         #signboard-close { cursor: pointer; color: #888; font-size: 16px; padding: 5px; }
-        #signboard-content { padding: 15px; font-size: 13px; line-height: 1.8; color: #ddd; flex-grow: 1; max-height: 300px; overflow-y: auto; }
+        #signboard-content { padding: 15px; font-size: 13px; line-height: 1.6; color: #ddd; flex-grow: 1; max-height: 300px; overflow-y: auto; }
         #signboard-img { width: 100%; height: 140px; object-fit: cover; border: 1px solid #444; margin-bottom: 10px; display: none; }
         #signboard-nav { display: flex; border-top: 1px solid #444; background: rgba(0,0,0,0.3); }
         .nav-btn { flex: 1; background: transparent; border: none; color: var(--neon-cyan); padding: 15px; cursor: pointer; font-size: 16px; }
@@ -111,7 +113,7 @@
         /* News List */
         .news-item { padding: 12px 8px; border-bottom: 1px solid #333; cursor: pointer; font-size: 13px; color: #ccc; }
         .news-item:hover { background: rgba(0, 243, 255, 0.15); color: #fff; padding-left: 12px; }
-        .badge { font-size: 10px; padding: 3px 6px; border-radius: 2px; margin-right: 5px; color:#000; font-weight:bold; display:inline-block; width: 70px; text-align: center; font-family: var(--font-body);}
+        .badge { font-size: 10px; padding: 3px 6px; border-radius: 2px; margin-right: 5px; color:#000; font-weight:bold; display:inline-block; width: 70px; text-align: center;}
         .timestamp { display: block; font-size: 10px; color: var(--neon-cyan); margin-top: 4px; text-align: right; opacity: 0.7; font-family: var(--font-ui); }
 
         /* Menu Bar */
@@ -145,36 +147,54 @@
 
         /* --- MOBILE OPTIMIZATION --- */
         @media (max-width: 768px) {
+            /* Hide PC Elements */
             .cesium-viewer-bottom, #guide { display: none; }
+            
+            /* Mobile Window Layout */
             .window { 
                 width: 94% !important; left: 3% !important; top: 55px !important;
                 max-height: 70vh;
             }
+            
+            /* Signboard as Bottom Sheet (Critical Fix) */
             #signboard-container {
                 position: fixed !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 top: auto !important;
                 width: 100% !important;
-                transform: none !important;
+                transform: none !important; /* Disable 3D transform */
                 display: flex;
                 justify-content: center;
                 align-items: flex-end;
-                padding-bottom: 20px;
+                padding-bottom: 20px; /* SafeArea */
                 pointer-events: none;
             }
-            .signboard-offset { transform: none; padding-bottom: 0; width: 100%; align-items: center; }
-            #signboard-pole { display: none; }
+            
+            .signboard-offset {
+                transform: none;
+                padding-bottom: 0;
+                width: 100%;
+                align-items: center;
+            }
+
+            #signboard-pole { display: none; /* No pole on mobile */ }
+
             #signboard-card {
-                width: 92%; border-bottom: none; border-radius: 12px;
+                width: 92%;
+                border-bottom: none;
+                border-radius: 12px;
                 box-shadow: 0 -5px 30px rgba(0,0,0,0.8);
                 pointer-events: auto;
                 background: rgba(10, 15, 25, 0.95);
             }
+
             #signboard-close { padding: 15px; font-size: 20px; }
+            
+            /* Larger Touch Targets */
             .menu-btn { padding: 8px 16px; font-size: 12px; }
             .news-item { padding: 16px 10px; }
-            input, select, textarea { font-size: 16px; }
+            input, select, textarea { font-size: 16px; } /* Prevent iOS Zoom */
         }
     </style>
 </head>
@@ -189,7 +209,7 @@
     </div>
 
     <div id="menubar">
-        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v10.95</div>
+        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v10.9</div>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-feed')">NEWS</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-post')">POST</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-utility')">SYSTEM</button>
@@ -240,23 +260,23 @@
         <div id="post-wrapper" class="window-content-wrapper">
             <div class="window-content">
                 <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <input type="text" id="addressInput" placeholder="エリア検索 (例: 渋谷)">
+                    <input type="text" id="addressInput" placeholder="Search Area...">
                     <button onclick="App.searchAddress()" style="width:30%;background:#333;color:#fff;border:1px solid #444;">GO</button>
                 </div>
                 <hr style="border-color:#333;">
                 <select id="inputCat">
-                    <option value="entertainment">エンタメ</option>
-                    <option value="economy">経済</option>
-                    <option value="incident">事件</option>
-                    <option value="politics">政治</option>
+                    <option value="entertainment">ENTERTAINMENT</option>
+                    <option value="economy">ECONOMY</option>
+                    <option value="incident">INCIDENT</option>
+                    <option value="politics">POLITICS</option>
                 </select>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="inputLat" placeholder="緯度 (Lat)">
-                    <input type="text" id="inputLon" placeholder="経度 (Lon)">
+                    <input type="text" id="inputLat" placeholder="Lat">
+                    <input type="text" id="inputLon" placeholder="Lon">
                 </div>
-                <input type="text" id="inputTitle" placeholder="タイトル">
-                <input type="text" id="inputImgUrl" placeholder="画像URL (任意)">
-                <textarea id="inputBody" rows="3" placeholder="本文..."></textarea>
+                <input type="text" id="inputTitle" placeholder="Title">
+                <input type="text" id="inputImgUrl" placeholder="Image URL (Optional)">
+                <textarea id="inputBody" rows="3" placeholder="Body..."></textarea>
                 <button class="action-btn" onclick="App.addNewsFromForm()">UPLOAD DATA</button>
             </div>
         </div>
@@ -277,7 +297,7 @@
                 <div class="calendar-grid" id="calendar-container"></div>
                 <div style="font-size:11px; color:#888; margin:10px 0 5px;">TASKS</div>
                 <div style="display:flex; gap:2px;">
-                    <input type="text" id="todo-input" placeholder="タスク入力...">
+                    <input type="text" id="todo-input" placeholder="New Task...">
                     <button style="width:30px; cursor:pointer; background:#333; color:#fff; border:1px solid #555;" onclick="App.addTodo()">+</button>
                 </div>
                 <ul id="todo-list"></ul>
@@ -289,10 +309,10 @@
         const CONFIG = {
             cesiumToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNGYxNTA0NC05YjkyLTQwMDEtODAyNS1iNWU1MWMzOTExN2YiLCJpZCI6MzYxNjM4LCJpYXQiOjE3NjM1MTczMzd9.p33ZKkhH-eN-nTJsvfmVNyVZDjIhwwGZMx2PxAc6dig', // ★ Set Token Here
             categories: {
-                'incident': { label: '事件', color: '#ff3333', cesium: Cesium.Color.RED },
-                'economy': { label: '経済', color: '#bd00ff', cesium: Cesium.Color.PURPLE },
-                'entertainment': { label: 'エンタメ', color: '#f1c40f', cesium: Cesium.Color.GOLD },
-                'politics': { label: '政治', color: '#00ff41', cesium: Cesium.Color.LIME }
+                'incident': { color: '#ff3333', cesium: Cesium.Color.RED },
+                'economy': { color: '#bd00ff', cesium: Cesium.Color.PURPLE },
+                'entertainment': { color: '#f1c40f', cesium: Cesium.Color.GOLD },
+                'politics': { color: '#00ff41', cesium: Cesium.Color.LIME }
             }
         };
 
@@ -367,15 +387,27 @@
         scene.fog.enabled = true; scene.fog.density = 0.0005;
         scene.globe.enableLighting = false; scene.sun.show = false; scene.skyBox.show = false;
 
+        // ★★★ CONTROLS OPTIMIZATION (Mobile Friendly) ★★★
         const sscc = scene.screenSpaceCameraController;
+        
+        // 1. Enable Translate (Pan) on Left Drag (Standard)
         sscc.enableTranslate = true;
         sscc.translateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
+        
+        // 2. Enable Zoom on Wheel & Pinch
         sscc.enableZoom = true;
         sscc.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
+        
+        // 3. Enable Rotate/Tilt on Right Drag & Two Finger Drag
         sscc.enableRotate = true;
         sscc.rotateEventTypes = [Cesium.CameraEventType.RIGHT_DRAG, Cesium.CameraEventType.PINCH]; 
         sscc.tiltEventTypes = [Cesium.CameraEventType.PINCH, Cesium.CameraEventType.RIGHT_DRAG];
         
+        // ※ Note: In Cesium, 'PINCH' handles both Zoom and Tilt depending on gesture. 
+        // This config allows:
+        // - 1 Finger: Move Map (Pan)
+        // - 2 Fingers: Zoom / Rotate / Tilt
+
         async function loadBuildings() {
             try {
                 const tileset = await Cesium.createOsmBuildings();
@@ -393,14 +425,13 @@
 
         // --- Logic ---
         const App = {
-            // Data restored to ~20 items with Japanese categories and longer text
             initData: [
                 { id:1, lat:35.6938, lon:139.7448, cat:'entertainment', time: "10:42", title:"千鳥ヶ淵の桜、早期開花予想", body:"暖冬の影響で例年より1週間早い開花が予想されています。気象庁の最新の観測データによると、東京都心の積算温度は過去10年で最も高いペースで推移しており、千鳥ヶ淵のソメイヨシノも蕾が大きく膨らみ始めています。周辺のライトアップイベントも前倒しで開催されることが決定し、運営委員会は急ピッチで準備を進めています。夜桜観賞船の予約は既に開始されており、週末のチケットは争奪戦が予想されます。", img:"https://image.walkerplus.com/wpimg/walkertouch/wtd/images/l2/268816.jpg" },
                 { id:2, lat:35.6984, lon:139.7731, cat:'entertainment', time: "09:15", title:"秋葉原eスポーツ施設開業", body:"駅前に国内最大級のeスポーツ専用複合施設「AKB CYBER ARENA」が本日グランドオープンを迎えました。全フロアに超高速5G通信環境を完備し、最新のハイエンドゲーミングPCを500台設置。オープニングイベントには世界的なプロゲーマーチームが招待され、エキシビションマッチが行われています。施設内にはVR体験ゾーンや配信スタジオも併設されており、次世代のエンターテインメント発信基地として期待が高まっています。", img:"https://resources.matcha-jp.com/resize/720x2000/2024/09/27-199411.webp" },
                 { id:3, lat:35.6852, lon:139.7528, cat:'incident', time: "08:30", title:"霞が関で通信障害発生", body:"【速報】午前8時頃より、霞が関の官庁街エリアを中心とした一部地域で大規模な通信障害が発生しています。複数の省庁で内部ネットワークへの接続が不安定になっており、業務に支障が出始めています。現在、原因は調査中ですが、通信事業者によると物理的な回線切断の可能性は低く、ソフトウェアの不具合あるいは外部からのサイバー攻撃の可能性も含めて慎重に確認を進めているとのことです。復旧の目処は立っていません。", img:"https://skyticket.jp/guide/wp-content/uploads/c530e76c-pixta_41961206-1200x675.jpg?imwidth=400" },
                 { id:4, lat:35.6812, lon:139.7671, cat:'economy', time: "Yesterday", title:"東京駅110周年記念", body:"東京駅が開業110周年を迎え、記念式典と限定グッズの販売会が丸の内駅舎前で行われました。早朝5時から熱心な鉄道ファンや観光客で行列ができ、整理券は配布開始からわずか30分で終了する盛況ぶりでした。記念硬券セットや、100年前の駅舎をデザインした限定Suicaが飛ぶように売れています。また、駅構内の商業施設では「東京駅グルメフェス」も同時開催され、限定メニューを求める人々で賑わいを見せています。", img:"https://image.news.livedoor.com/newsimage/4/b/4baa2_249_2010-03-12-114351.jpg" },
                 { id:5, lat:35.6865, lon:139.7637, cat:'economy', time: "Yesterday", title:"大手町Tech Base始動", body:"大手町エリアの再開発地区に、AIスタートアップ支援に特化した拠点「Otemachi Tech Base」が本格始動しました。政府と民間企業が共同で出資し、有望なベンチャー企業に対してオフィススペースの無償提供や、大企業とのマッチング支援を行います。開所式には経済産業大臣も出席し、「ここから次のユニコーン企業を生み出す」と力強く宣言しました。既に50社以上の入居が決まっており、日本のイノベーションの中心地となることが期待されています。", img:"https://umekita-tech-base.jp/wp-content/uploads/2025/06/IMG_8319-1024x768.jpg" },
-                { id:6, lat:35.6917, lon:139.7709, cat:'entertainment', time: "Yesterday", title:"神田カレーグランプリ", body:"年に一度のカレーの祭典「神田カレーグランプリ」の決勝戦が行われ、創業70年の老舗洋食店が悲願の初優勝を飾りました。今年のテーマは「スパイスと出汁の融合」で、各店が趣向を凝らした一皿を提供。優勝した店舗の「特製欧風魚介カレー」は、投票者の圧倒的な支持を集めました。会場周辺にはスパイシーな香りが漂い、約5万人の来場者が食べ比べを楽しみました。優勝店には早速長蛇の列ができています。", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1HG6dETR65_yNB6CzuybfvDtLK9moY9sBRYF14YdPtZo52Vai7rY8tb2D-UvIlr9CUlo&usqp=CAhttps://chuosuki.jp/wp/wp-content/uploads/2025/09/KCG-main2025.png" },
+                { id:6, lat:35.6917, lon:139.7709, cat:'entertainment', time: "Yesterday", title:"神田カレーグランプリ", body:"年に一度のカレーの祭典「神田カレーグランプリ」の決勝戦が行われ、創業70年の老舗洋食店が悲願の初優勝を飾りました。今年のテーマは「スパイスと出汁の融合」で、各店が趣向を凝らした一皿を提供。優勝した店舗の「特製欧風魚介カレー」は、投票者の圧倒的な支持を集めました。会場周辺にはスパイシーな香りが漂い、約5万人の来場者が食べ比べを楽しみました。優勝店には早速長蛇の列ができています。", img:"https://chuosuki.jp/wp/wp-content/uploads/2025/09/KCG-main2025.png" },
                 { id:7, lat:35.6759, lon:139.7448, cat:'politics', time: "2 days ago", title:"国会議事堂夜間ツアー", body:"国会議事堂の魅力をより多くの人に知ってもらうため、初の試みとなる「夜間特別見学ツアー」が試験的に導入されました。通常は見学できない夜の時間帯に、ライトアップされた議事堂内部や本会議場を見学できるプレミアムな体験です。定員制のツアーは募集開始直後に満席となり、参加者からは「昼間とは違う荘厳な雰囲気に感動した」との声が聞かれました。好評を受け、参議院事務局は定例化を検討しています。", img:"https://www.matsushitas-lighting.com/images/kokkai.jpg" },
                 { id:8, lat:35.6736, lon:139.7560, cat:'entertainment', time: "2 days ago", title:"日比谷公園ガーデニング", body:"日比谷公園にて国内最大規模のガーデニングショーが開幕しました。全国から集まった造園家たちが、限られたスペースの中に小宇宙を表現する「箱庭コンテスト」が見どころです。今年のトレンドは「サステナブルな庭造り」で、廃材を利用したアートや、節水型の植物配置などが注目を集めています。夜間はLEDによるイルミネーション演出も行われ、幻想的な植物の世界を楽しむことができます。", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSjTLa4z2nvDBHkXwJ5KjMwuhcE8afoaJwNkw&s" },
                 { id:9, lat:35.7001, lon:139.7714, cat:'economy', time: "3 days ago", title:"レトロゲーム市場高騰", body:"秋葉原のレトロゲーム専門店で、海外からの観光客による需要爆発が続いています。特に1990年代のゲームソフトやハードウェアが「芸術品」として評価され、価格が高騰中。未開封の希少ソフトが数百万円で取引されるケースも珍しくありません。店長は「倉庫に眠っていた在庫が一瞬でなくなる勢いだ」と嬉しい悲鳴を上げています。円安の影響も相まって、このブームは当面続くと見られています。", img:"https://rocketnews24.com/wp-content/uploads/sites/2/2021/06/%E5%90%8D%E7%A7%B0%E6%9C%AA%E8%A8%AD%E5%AE%9A-3.jpg" },
@@ -414,7 +445,7 @@
                 { id:17, lat:35.6811, lon:139.7368, cat:'entertainment', time: "1 week ago", title:"紀尾井町スイーツフェア", body:"紀尾井町のホテルニューオータニ周辺で、春のスイーツフェアが開催されています。今年は「桜と苺」をテーマに、各パティスリーが芸術的なケーキやパフェを競作。特に、1個3000円を超える高級ショートケーキは、発売開始から1時間で完売するほどの人気ぶりです。期間中はスタンプラリーも行われ、全店舗を制覇した強者にはホテル宿泊券などの豪華賞品が当たるチャンスがあります。", img:"https://placehold.co/600x400/f1c40f/000000?text=Cake" },
                 { id:18, lat:35.6940, lon:139.7536, cat:'incident', time: "1 week ago", title:"九段下で水道管破裂", body:"九段下交差点付近で老朽化した水道管が破裂し、道路の一部が冠水する事故が発生しました。水柱は一時3メートルの高さまで上がり、周辺道路は通行止めとなりました。水道局の緊急車両が到着し、現在はバルブを閉めて止水作業を行っていますが、近隣のビルの一部で断水が発生しています。通勤時間帯と重なったため、地下鉄の出入り口にも影響が出ており、現場は一時騒然としました。", img:"https://placehold.co/600x400/ff3333/ffffff?text=Water" },
                 { id:19, lat:35.6689, lon:139.7598, cat:'economy', time: "1 week ago", title:"新橋SL広場リニューアル", body:"サラリーマンの聖地として知られる新橋駅前のSL広場が、リニューアル工事を終えて公開されました。象徴であるSLはそのままに、周囲にウッドデッキやベンチが増設され、より滞在しやすい空間になっています。夜間はSL自体がライトアップされ、定時には汽笛の音とともに蒸気（ミスト）が出る演出も追加されました。待ち合わせスポットとしての利便性が向上し、新たな観光名所となりそうです。", img:"https://placehold.co/600x400/bd00ff/ffffff?text=SL" },
-                { id:20, lat:35.6896, lon:139.6917, cat:'politics', time: "1 week ago", title:"都庁プロジェクション", body:"東京都庁第一本庁舎の壁面を利用したプロジェクションマッピングの通年上映がスタートしました。ギネス世界記録にも認定された世界最大級の常設展示で、毎晩異なるコンテンツが上映されます。観光客誘致の切り札として期待されており、初日の昨夜は周辺の広場が観客で埋め尽くされました。光と音のスペクタクルショーは、東京の夜空を新たな色で彩っています。", img:"https://placehold.co/600x400/00ff41/000000?text=Gov" }
+                { id:20, lat:35.6896, lon:139.6917, cat:'politics', time: "1 week ago", title:"都庁プロジェクション", body:"東京都庁第一本庁舎の壁面を利用したプロジェクションマッピングの通年上映がスタートしました。ギネス世界記録にも認定された世界最大級の常設展示で、毎晩異なるコンテンツが上映されます。観光客誘致の切り札として期待されています。初日の昨夜は周辺の広場が観客で埋め尽くされました。光と音のスペクタクルショーは、東京の夜空を新たな色で彩っています。", img:"https://placehold.co/600x400/00ff41/000000?text=Gov" }
             ],
             renderItem: (item, prepend = false) => {
                 const cat = CONFIG.categories[item.cat];
@@ -432,8 +463,7 @@
 
                 const div = document.createElement('div');
                 div.className = 'news-item';
-                // Use Japanese label from CONFIG
-                div.innerHTML = `<span class="badge" style="background:${cat.color}">${cat.label}</span> <b>${item.title}</b><span class="timestamp">${item.time}</span>`;
+                div.innerHTML = `<span class="badge" style="background:${cat.color}">${item.cat.toUpperCase()}</span> <b>${item.title}</b><span class="timestamp">${item.time}</span>`;
                 div.onclick = () => {
                     if(STATE.isMobile) UI.toggleWindow('panel-feed');
                     App.startOrbit(item);
@@ -464,12 +494,12 @@
                 const lat = parseFloat(document.getElementById('inputLat').value);
                 const lon = parseFloat(document.getElementById('inputLon').value);
                 const title = document.getElementById('inputTitle').value;
-                if (!lat || !lon || !title) { alert("必須項目が足りません"); return; }
+                if (!lat || !lon || !title) { alert("Required fields missing"); return; }
                 
                 const now = new Date();
                 const newItem = {
                     id: Date.now(), lat, lon, cat: document.getElementById('inputCat').value,
-                    title, body: document.getElementById('inputBody').value || "詳細情報はありません。", 
+                    title, body: document.getElementById('inputBody').value || "", 
                     img: document.getElementById('inputImgUrl').value || "",
                     time: `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
                 };
@@ -483,11 +513,13 @@
                 STATE.isOrbiting = true;
                 App.updateSignboard(item);
                 
+                // Show Container
                 document.getElementById('signboard-container').style.display = 'flex';
                 
                 STATE.currentTargetPos = Cesium.Cartesian3.fromDegrees(item.lon, item.lat, 50);
                 const center = STATE.currentTargetPos;
                 
+                // Adjust Camera Offset (More distance on mobile to see context)
                 const range = STATE.isMobile ? 1800 : 1200;
                 
                 camera.flyTo({
@@ -515,21 +547,13 @@
                 document.getElementById('signboard-title').innerText = item.title;
                 document.getElementById('signboard-title').style.color = cat.color;
                 document.getElementById('signboard-card').style.borderColor = cat.color;
-                // Only show pole on desktop
-                if(!STATE.isMobile) {
-                    document.getElementById('signboard-pole').style.background = cat.color;
-                    document.getElementById('signboard-pole').style.display = 'block';
-                } else {
-                    document.getElementById('signboard-pole').style.display = 'none';
-                }
+                document.getElementById('signboard-pole').style.background = cat.color;
                 
                 const img = document.getElementById('signboard-img');
                 if(item.img){ img.src = item.img; img.style.display='block'; } else { img.style.display='none'; }
                 
                 document.querySelectorAll('.nav-btn').forEach(b => b.style.color = cat.color);
-                
-                // Text chunking - smaller chunks for mobile to encourage pagination
-                STATE.currentPages = App.chunkString(item.body, STATE.isMobile ? 50 : 80);
+                STATE.currentPages = App.chunkString(item.body, STATE.isMobile ? 30 : 40);
                 STATE.currentPageIndex = 0;
                 App.renderPage();
             },
@@ -567,13 +591,18 @@
 
         App.initAllItems();
 
+        // Tracking Logic (Optimized for Mobile)
         scene.postRender.addEventListener(() => {
             const sb = document.getElementById('signboard-container');
+            // If hidden or on mobile (fixed pos), skip 3D calculation
             if (sb.style.display === 'none') return;
             if (STATE.isMobile) {
+                // Mobile: CSS handles position (bottom sheet), just ensure opacity
                 sb.style.opacity = 1; 
                 return;
             }
+            
+            // Desktop: 3D tracking
             if (STATE.currentTargetPos) {
                 const pos = Cesium.SceneTransforms.wgs84ToWindowCoordinates(scene, STATE.currentTargetPos);
                 if (pos) {
@@ -585,6 +614,7 @@
             }
         });
 
+        // Click Handler
         const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
         handler.setInputAction(() => { if(STATE.isOrbiting) App.stopOrbit(); }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
         handler.setInputAction(c => {
@@ -592,9 +622,11 @@
             if (Cesium.defined(picked) && picked.id?.properties?.newsData) App.startOrbit(picked.id.properties.newsData.getValue());
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+        // Utility
         setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
         window.addEventListener('resize', () => { STATE.isMobile = window.innerWidth < 768; });
 
+        // Simple Calendar Init
         const now = new Date(), cal = document.getElementById('calendar-container');
         ['S','M','T','W','T','F','S'].forEach(d => cal.innerHTML += `<div class="cal-header">${d}</div>`);
         for(let i=0; i<new Date(now.getFullYear(), now.getMonth(), 1).getDay(); i++) cal.innerHTML+='<div></div>';
