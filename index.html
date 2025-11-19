@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEO TOKYO OS v10.9 (Mobile Optimized)</title>
+    <title>NEO TOKYO OS v11.0 (Mobile Move Only)</title>
     
     <script src="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Cesium.js"></script>
     <link href="https://cesium.com/downloads/cesiumjs/releases/1.105/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
@@ -23,7 +23,7 @@
             --font-ui: 'Orbitron', sans-serif;
             --font-body: 'Roboto', sans-serif;
         }
-        body, html { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; color: var(--text-main); font-family: var(--font-body); }
+        body, html { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; color: var(--text-main); font-family: var(--font-body); touch-action: none; /* ブラウザのスクロール無効化 */ }
         
         /* --- Map Container --- */
         #cesiumContainer { width: 100%; height: 100%; z-index: 0; }
@@ -108,7 +108,6 @@
         /* Window Positions */
         #panel-feed { top: 60px; left: 20px; width: 300px; }
         #panel-post { top: 60px; left: 340px; width: 300px; display: none; }
-        #panel-utility { top: 60px; right: 20px; width: 250px; }
 
         /* News List */
         .news-item { padding: 12px 8px; border-bottom: 1px solid #333; cursor: pointer; font-size: 13px; color: #ccc; }
@@ -130,12 +129,6 @@
             transition: 0.3s; flex-shrink: 0; 
         }
         .menu-btn:hover { background: var(--neon-cyan); color: #000; }
-
-        /* Utility & Calendar */
-        #clock { font-family: var(--font-ui); font-size: 24px; text-align: center; color: #fff; text-shadow: 0 0 5px var(--neon-cyan); margin-bottom: 10px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 10px; }
-        .cal-day { padding: 6px 2px; background: rgba(255,255,255,0.05); color: #aaa; }
-        .cal-today { background: var(--neon-cyan); color: #000; font-weight: bold; }
 
         /* Guide */
         #guide {
@@ -209,11 +202,10 @@
     </div>
 
     <div id="menubar">
-        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v10.9</div>
+        <div style="font-family:var(--font-ui); color:var(--neon-cyan); margin-right:20px; font-weight:bold; font-size:16px;">NEO TOKYO v11.0</div>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-feed')">NEWS</button>
         <button class="menu-btn" onclick="UI.toggleWindow('panel-post')">POST</button>
-        <button class="menu-btn" onclick="UI.toggleWindow('panel-utility')">SYSTEM</button>
-    </div>
+        </div>
 
     <div id="signboard-container">
         <div class="signboard-offset">
@@ -282,29 +274,6 @@
         </div>
     </div>
 
-    <div id="panel-utility" class="window">
-        <div class="window-header">
-            <span class="window-title">SYSTEM</span>
-            <div>
-                <i class="fas fa-chevron-up toggle-icon" onclick="UI.toggleContent('utility-wrapper', this)"></i>
-                <i class="fas fa-times" style="color:#888; cursor:pointer; padding-left:10px;" onclick="UI.toggleWindow('panel-utility')"></i>
-            </div>
-        </div>
-        <div id="utility-wrapper" class="window-content-wrapper">
-            <div class="window-content">
-                <div id="clock">00:00:00</div>
-                <div style="text-align:center; margin-bottom:5px; color:#fff; font-size:11px;" id="cal-month-display"></div>
-                <div class="calendar-grid" id="calendar-container"></div>
-                <div style="font-size:11px; color:#888; margin:10px 0 5px;">TASKS</div>
-                <div style="display:flex; gap:2px;">
-                    <input type="text" id="todo-input" placeholder="New Task...">
-                    <button style="width:30px; cursor:pointer; background:#333; color:#fff; border:1px solid #555;" onclick="App.addTodo()">+</button>
-                </div>
-                <ul id="todo-list"></ul>
-            </div>
-        </div>
-    </div>
-
     <script>
         const CONFIG = {
             cesiumToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhNGYxNTA0NC05YjkyLTQwMDEtODAyNS1iNWU1MWMzOTExN2YiLCJpZCI6MzYxNjM4LCJpYXQiOjE3NjM1MTczMzd9.p33ZKkhH-eN-nTJsvfmVNyVZDjIhwwGZMx2PxAc6dig', // ★ Set Token Here
@@ -330,6 +299,7 @@
         const UI = {
             toggleWindow: (id) => {
                 const el = document.getElementById(id);
+                if (!el) return;
                 if (getComputedStyle(el).display === 'none') {
                     el.style.display = 'flex';
                     UI.bringToFront(el);
@@ -372,7 +342,7 @@
         };
         document.querySelectorAll('.window-header').forEach(h => UI.makeDraggable(h));
 
-        // --- Cesium Init (Map Controls Optimized) ---
+        // --- Cesium Init (Map Controls STRICTLY Optimized for Mobile Movement) ---
         Cesium.Ion.defaultAccessToken = CONFIG.cesiumToken;
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrainProvider: Cesium.createWorldTerrain(),
@@ -387,26 +357,32 @@
         scene.fog.enabled = true; scene.fog.density = 0.0005;
         scene.globe.enableLighting = false; scene.sun.show = false; scene.skyBox.show = false;
 
-        // ★★★ CONTROLS OPTIMIZATION (Mobile Friendly) ★★★
+        // ★★★ STRICT MOBILE CONTROLS (MOVEMENT ONLY) ★★★
+        // これにより1本指で移動、2本指で回転・ズームに固定されます
         const sscc = scene.screenSpaceCameraController;
         
-        // 1. Enable Translate (Pan) on Left Drag (Standard)
+        // 1. Disable "Look" (視点変更) to prevent confusing rotation on touch
+        sscc.enableLook = false;
+        
+        // 2. Basic Enablers
         sscc.enableTranslate = true;
+        sscc.enableZoom = true;
+        sscc.enableRotate = true;
+        sscc.enableTilt = true;
+        
+        // 3. Map Touch Events to Actions (スマホ操作の肝)
+        // 1本指ドラッグ = 地図移動 (Pan)
         sscc.translateEventTypes = [Cesium.CameraEventType.LEFT_DRAG];
         
-        // 2. Enable Zoom on Wheel & Pinch
-        sscc.enableZoom = true;
+        // 2本指ピンチ/ドラッグ = ズーム、回転、傾き
         sscc.zoomEventTypes = [Cesium.CameraEventType.WHEEL, Cesium.CameraEventType.PINCH];
-        
-        // 3. Enable Rotate/Tilt on Right Drag & Two Finger Drag
-        sscc.enableRotate = true;
-        sscc.rotateEventTypes = [Cesium.CameraEventType.RIGHT_DRAG, Cesium.CameraEventType.PINCH]; 
+        sscc.rotateEventTypes = [Cesium.CameraEventType.PINCH]; 
         sscc.tiltEventTypes = [Cesium.CameraEventType.PINCH, Cesium.CameraEventType.RIGHT_DRAG];
-        
-        // ※ Note: In Cesium, 'PINCH' handles both Zoom and Tilt depending on gesture. 
-        // This config allows:
-        // - 1 Finger: Move Map (Pan)
-        // - 2 Fingers: Zoom / Rotate / Tilt
+
+        // Inertia (慣性) adjustments for smoother feel
+        sscc.inertiaSpin = 0.5;
+        sscc.inertiaTranslate = 0.5;
+        sscc.inertiaZoom = 0.5;
 
         async function loadBuildings() {
             try {
@@ -576,16 +552,6 @@
             closeSignboard: () => {
                 document.getElementById('signboard-container').style.display = 'none';
                 App.stopOrbit();
-            },
-            addTodo: () => {
-                const val = document.getElementById('todo-input').value;
-                if(val) {
-                    const li = document.createElement('li');
-                    li.innerHTML = `<span>${val}</span><i class="fas fa-times" onclick="this.parentElement.remove()"></i>`;
-                    li.className = 'todo-item';
-                    document.getElementById('todo-list').appendChild(li);
-                    document.getElementById('todo-input').value = '';
-                }
             }
         };
 
@@ -622,16 +588,7 @@
             if (Cesium.defined(picked) && picked.id?.properties?.newsData) App.startOrbit(picked.id.properties.newsData.getValue());
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
-        // Utility
-        setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
         window.addEventListener('resize', () => { STATE.isMobile = window.innerWidth < 768; });
-
-        // Simple Calendar Init
-        const now = new Date(), cal = document.getElementById('calendar-container');
-        ['S','M','T','W','T','F','S'].forEach(d => cal.innerHTML += `<div class="cal-header">${d}</div>`);
-        for(let i=0; i<new Date(now.getFullYear(), now.getMonth(), 1).getDay(); i++) cal.innerHTML+='<div></div>';
-        for(let i=1; i<=new Date(now.getFullYear(), now.getMonth()+1, 0).getDate(); i++) 
-            cal.innerHTML += `<div class="cal-day ${i===now.getDate()?'cal-today':''}">${i}</div>`;
     </script>
 </body>
 </html>
